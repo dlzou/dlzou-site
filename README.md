@@ -1,6 +1,5 @@
-# Personal Website
+# dlzou.com (hopefully)
 
-FastAPI, Vue.js, PostgreSQL, SQLAlchemy. Maybe Celery. 
+FastAPI, Vue.js, SQLAlchemy. Maybe Celery. 
 
-You: "Isn't this overkill for--" 
-Me: Shh...
+"Isn't this overkill for a personal website?" Yes.
