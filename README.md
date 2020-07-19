@@ -1,5 +1,5 @@
 # dlzou.com (hopefully)
 
-FastAPI, Vue.js, SQLAlchemy. Maybe Celery. 
+FastAPI, Pydantic, SQLAlchemy, Vue.js. Maybe asyncio or Celery. 
 
-"Isn't this overkill for a personal website?" Yes.
+"Isn't this overkill for a personal website?" Shh...
