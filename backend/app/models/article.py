@@ -10,7 +10,7 @@ def datetime_to_str(dt: datetime) -> str:
 
 
 def check_tag(cls, value: str) -> str:
-    if match(r'^[\w]+([-\.][\w]+)*$', value):
+    if len(value) <= 30 and match(r'^[\w]+([-\.][\w]+)*$', value):
         return value
     raise ValueError('invalid tag format')
 
@@ -21,45 +21,37 @@ def default_datetime(cls, value: datetime) -> datetime:
 
 class Model(BaseModel):
     class Config:
-        allow_population_by_field_name = True
         json_encoders = {datetime: datetime_to_str}
 
 
 class BaseArticle(Model):
-    article_id: Optional[int] = None
-    slug: Optional[str] = None
     title: Optional[str] = None
     description: Optional[str] = None
     body: Optional[str] = None
-    tags: Optional[list[str]] = None
     author: str = 'Daniel Zou'
-    time_created: Optional[datetime] = None
-    time_updated: Optional[datetime] = None
-    views: Optional[int] = None
 
 
 class Preview(BaseArticle):
-    article_id: int
-    slug: int
+    id_: str
+    slug: str
     title: str
     description: str
-    tags: list[str]
     time_created: datetime
     time_updated: Optional[datetime] = None
     views: int
+    tags: list[Tag]
 
-    _check_tags = validator('tags', each_item=True, allow_reuse=True)(check_tag)
 
-    _default_datetime = validator(
-        'time_created', 'time_updated', allow_reuse=True)(default_datetime)
+class PreviewList(Model):
+    previews: list[Preview]
 
 
 class CreateArticle(BaseArticle):
     title: str
     description: str
     body: str
-    tags: list[str]
     time_created: datetime
+    tags: list[str]
 
     _check_tags = validator('tags', each_item=True, allow_reuse=True)(check_tag)
 
@@ -67,28 +59,40 @@ class CreateArticle(BaseArticle):
 
 
 class UpdateArticle(BaseArticle):
+    id_: str
     title: str
     description: str
     body: str
-    tags: list[str]
     time_updated: datetime
+    tags: list[str]
 
     _check_tags = validator('tags', each_item=True, allow_reuse=True)(check_tag)
 
     _default_datetime = validator('time_updated', allow_reuse=True)(default_datetime)
 
 
-class DBToArticle(BaseArticle):
-    article_id: int
+class ArticleInDB(BaseArticle):
+    id_: str
     slug: str
     title: str
     description: str
     body: str
-    tags: list[str]
-    author = 'Daniel Zou'
+    author: str
     time_posted: datetime
     time_updated: datetime
     views: int
+    tags: list[Tag]
 
     class Config(Model.Config):
+        orm_mode = True
+
+
+class Tag(BaseModel):
+    id_: str
+    label: str
+    count: int
+
+    _check_tag = validator('label', allow_reuse=True)(check_tag)
+
+    class Config:
         orm_mode = True
