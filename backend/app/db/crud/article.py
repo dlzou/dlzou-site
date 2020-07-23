@@ -9,8 +9,8 @@ from app.db.models import Article, Tag, ArticleToTag
 
 
 def get_article_by_id(db: Session, article_id: str) -> Article:
-    article_rec = db.query(Article).filter(Article.id_ == article_id).first()
-    return article_rec
+    article = db.query(Article).filter(Article.id_ == article_id).first()
+    return article
 
 
 # assume all tags exist
@@ -19,8 +19,8 @@ def get_articles_by_filters(db: Session, tags: list[str], years: list[str]) -> l
 
 
 def get_preview_by_id(db: Session, article_id: str) -> Preview:
-    article_rec = db.query(Article).filter(Article.id_ == article_id).first()
-    return Preview.from_orm(article_rec)
+    article = db.query(Article).filter(Article.id_ == article_id).first()
+    return Preview.from_orm(article)
 
 
 def create_article(db: Session, obj_in: CreateArticle) -> Article:
@@ -47,8 +47,12 @@ def update_article(db: Session, obj_in: UpdateArticle) -> Article:
     }
     json_in.pop('tags')
     update = {**json_in, **meta}
+    article = get_article_by_id(json_in['id_'])
     for attr in update:
-        ...
+        setattr(article, attr, update[attr])
+    db.commit()
+    db.refresh(article)
+    return article
 
 
 def delete_article(db: Session, id_: int) -> Article:
