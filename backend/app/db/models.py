@@ -1,6 +1,8 @@
-from sqlalchemy import Table, Column, ForeignKey, Integer, String, Text, DateTime, event
-from sqlalchemy.orm import Session, relationship, attributes
+from sqlalchemy import Column, ForeignKey, Integer, String, Text, DateTime, event
+from sqlalchemy.orm import Session, object_session, relationship, attributes
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import func, select
 from re import sub
 
 
@@ -14,7 +16,7 @@ class Base:
 class Article(Base):
     id_ = Column(Integer, primary_key=True, nullable=False)
     title = Column(Text, nullable=False)
-    author = Column(String)
+    author = Column(String, nullable=False)
     description = Column(Text)
     body = Column(Text, nullable=False)
     time_created = Column(DateTime, nullable=False)
@@ -28,7 +30,18 @@ class Article(Base):
 class Tag(Base):
     id_ = Column(Integer, primary_key=True, nullable=False)
     label = Column(String, nullable=False)
-    count = Column(Integer)
+
+    # shook down @van for these
+    @hybrid_property
+    def count(self) -> int:
+        return object_session(self).query(ArticleToTag).with_parent(self).count()
+
+    @count.expression
+    def _count_exp(cls):
+        q = select([func.count(ArticleToTag.tag_id)]) \
+            .where(ArticleToTag.tag_id == cls.id_) \
+            .label('count')
+        return q
 
 
 class ArticleToTag(Base):

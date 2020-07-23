@@ -23,7 +23,7 @@ class Model(BaseModel):
 class BaseArticle(Model):
     title: str
     author = 'Daniel Zou'
-    description: str
+    description: Optional[str]
 
 
 class CreateArticle(BaseArticle):

@@ -46,6 +46,9 @@ def update_article(db: Session, obj_in: UpdateArticle) -> Article:
         'tags': _process_str_tags(json_in.tags, create=True)
     }
     json_in.pop('tags')
+    update = {**json_in, **meta}
+    for attr in update:
+        ...
 
 
 def delete_article(db: Session, id_: int) -> Article:
