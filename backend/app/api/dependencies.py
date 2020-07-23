@@ -13,3 +13,11 @@ def get_db() -> Generator:
         yield db
     finally:
         db.close()
+
+
+def is_admin() -> bool:
+    ...
+
+
+def get_slug() -> str:
+    ...

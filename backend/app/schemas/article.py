@@ -1,12 +1,12 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, validator
-from datetime import datetime, timezone
+from datetime import datetime
 from re import match
 
 
-def datetime_to_str(dt: datetime) -> str:
-    return dt.replace(tzinfo=timezone.utc).isoformat().replace('+00:00', 'Z')
+def datetime_str(dt: datetime) -> str:
+    return dt.isoformat()
 
 
 def check_tag(cls, value: str) -> str:
@@ -17,7 +17,7 @@ def check_tag(cls, value: str) -> str:
 
 class Model(BaseModel):
     class Config:
-        json_encoders = {datetime: datetime_to_str}
+        json_encoders = {datetime: datetime_str}
 
 
 class BaseArticle(Model):
@@ -34,7 +34,7 @@ class CreateArticle(BaseArticle):
 
 
 class UpdateArticle(BaseArticle):
-    id_: str
+    id_: int
     body: str
     tags: list[str]
 
@@ -42,7 +42,7 @@ class UpdateArticle(BaseArticle):
 
 
 class Article(BaseArticle):
-    id_: str
+    id_: int
     body: str
     time_created: datetime
     time_updated: Optional[datetime] = None
@@ -54,7 +54,7 @@ class Article(BaseArticle):
 
 
 class Preview(BaseArticle):
-    id_: str
+    id_: int
     time_created: datetime
     time_updated: Optional[datetime] = None
     tags: list[Tag]
@@ -69,7 +69,7 @@ class PreviewList(Model):
 
 
 class Tag(BaseModel):
-    id_: str
+    id_: int
     label: str
     count: int
 

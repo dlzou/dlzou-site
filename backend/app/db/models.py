@@ -12,12 +12,12 @@ class Base:
 
 
 class Article(Base):
-    id_ = Column(String, primary_key=True)
-    title = Column(Text)
+    id_ = Column(Integer, primary_key=True, nullable=False)
+    title = Column(Text, nullable=False)
     author = Column(String)
     description = Column(Text)
-    body = Column(Text)
-    time_created = Column(DateTime)
+    body = Column(Text, nullable=False)
+    time_created = Column(DateTime, nullable=False)
     time_updated = Column(DateTime)
     views = Column(Integer)
     tags = relationship('Tag',
@@ -26,14 +26,14 @@ class Article(Base):
 
 
 class Tag(Base):
-    id_ = Column(String, primary_key=True)
-    label = Column(String)
+    id_ = Column(Integer, primary_key=True, nullable=False)
+    label = Column(String, nullable=False)
     count = Column(Integer)
 
 
 class ArticleToTag(Base):
-    article_id = Column(String, ForeignKey('article.id_'))
-    tag_id = Column(String, ForeignKey('tag.id_'))
+    article_id = Column(Integer, ForeignKey('article.id_'))
+    tag_id = Column(Integer, ForeignKey('tag.id_'))
     articles = relationship('Article', secondary='article_to_tag')
 
 
