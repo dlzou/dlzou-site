@@ -29,7 +29,7 @@ class Article(Base):
 
 class Tag(Base):
     id_ = Column(Integer, primary_key=True, nullable=False)
-    label = Column(String, nullable=False)
+    label = Column(String, unique=True, nullable=False)
 
     # shook down @van for these
     @hybrid_property
