@@ -33,7 +33,7 @@ class Tag(Base):
 
     # shook down @van for these
     @hybrid_property
-    def count(self) -> int:
+    def count(self):
         return object_session(self).query(ArticleToTag).with_parent(self).count()
 
     @count.expression

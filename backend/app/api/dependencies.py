@@ -3,6 +3,7 @@ from typing import Generator
 from fastapi import Depends, HTTPException, status
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
+from re import sub
 
 from app.db.session import SessionFactory
 
@@ -19,5 +20,6 @@ def is_admin() -> bool:
     ...
 
 
-def get_slug() -> str:
-    ...
+def get_slug(title: str) -> str:
+    words = sub(r'[^\sa-z0-9]+', '', title.lower()).split()
+    return '-'.join(words)
