@@ -16,7 +16,7 @@ def get_db() -> Generator:
         db.close()
 
 
-def is_admin() -> bool:
+def authenticate(token: str) -> bool:
     ...
 
 

@@ -10,18 +10,43 @@ from app.api import dependencies as dep
 router = APIRouter()
 
 
-@router.post('/')
-def create_article(db: Session = Depends(dep.get_db),
-                   article=schemas.CreateArticle
-                   ) -> schemas.Article:
+@router.post('/new')
+def create_article(obj_in: schemas.CreateArticle,
+                   is_admin: bool = Depends(dep.authenticate),
+                   db: Session = Depends(dep.get_db)):
+    if not is_admin:
+        raise HTTPException(status_code=400, detail='Access denied.')
+    article = crud.article.create_article(db, obj_in)
+    return article
+
+
+@router.get('/', response_model=schemas.PreviewList)
+def get_articles(db: Session = Depends(dep.get_db)):
     ...
 
 
 @router.get('/{id_}', response_model=schemas.Article)
-def get_article(db: Session = Depends(dep.get_db)):
+def get_article(id_: int,
+                db: Session = Depends(dep.get_db)):
+    article = crud.article.get_article_by_id(id_)
+    if not article:
+        raise HTTPException(status_code=404, detail='Article not found.')
+    return article
+
+
+@router.put('/{id_}', response_model=schemas.Article)
+def update_article(id_: int,
+                   obj_in: schemas.UpdateArticle,
+                   is_admin: bool = Depends(dep.authenticate),
+                   db: Session = Depends(dep.get_db)):
+    if not is_admin:
+        raise HTTPException(status_code=400, detail='Access denied.')
     ...
 
 
-@router.put('/{id_}')
-def update_article(db: Session = Depends(dep.get_db)):
+@router.delete('/{id_}', response_model=schemas.Article)
+def delete_article(id_: int,
+                   is_admin: bool = Depends(dep.authenticate)):
+    if not is_admin:
+        raise HTTPException(status_code=400, detail='Access denied.')
     ...
