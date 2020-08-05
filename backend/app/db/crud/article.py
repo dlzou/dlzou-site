@@ -4,7 +4,7 @@ from sqlalchemy.sql import func, not_
 from fastapi.encoders import jsonable_encoder
 from datetime import datetime, timezone
 
-from app.schemas.article import CreateArticle, UpdateArticle, Preview, PreviewList
+from app.schemas import CreateArticle, UpdateArticle, Preview, PreviewList
 from app.db.models import Article, Tag, ArticleToTag
 
 
