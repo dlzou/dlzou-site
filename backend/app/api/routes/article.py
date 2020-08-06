@@ -21,7 +21,7 @@ def create_article(obj_in: schemas.CreateArticle,
 
 
 @router.get('/', response_model=schemas.PreviewList)
-def get_previews(tags: list[str] = [],
+def get_previews(tags: list[schemas.Tag] = [],
                  years: list[int] = [],
                  skip: int = 0,
                  limit: int = 10,

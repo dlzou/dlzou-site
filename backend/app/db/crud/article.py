@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Union
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func, not_
 from fastapi.encoders import jsonable_encoder
@@ -20,16 +21,18 @@ def get_preview_by_id(db: Session, article_id: int) -> Preview:
 
 def get_ids_by_filters(db: Session,
                        *,
-                       tags: list[str] = [],
+                       tags: Union[list[str], list[Tag]] = [],
                        years: list[int] = [],
                        skip: int = 0,
                        limit: int = 10
                        ) -> list[int]:
-    tags[:] = _process_tag_labels(db, tags, create=False)
     article_ids = db.query(Article.id_)
 
     if len(tags) > 0:
-        article_ids = article_ids.filter(Article.tags.any(Tag.label.in_(tags)))
+        if isinstance(tags[0], str):
+            article_ids = article_ids.filter(Article.tags.any(Tag.label.in_(tags)))
+        else:
+            article_ids = article_ids.filter(Article.tags.any(Tag.in_(tags)))
 
     if len(years) > 0:
         article_ids = article_ids.filter(Article.time_created.year.in_(years))
@@ -44,7 +47,7 @@ def create_article(db: Session, obj_in: CreateArticle) -> Article:
         'id_': _new_article_id(db),
         'time_created': datetime.now(timezone.utc),
         'views': 0,
-        'tags': _process_tag_labels(json_in.tags, create=True)
+        'tags': process_tag_labels(json_in.tags, create=True)
     }
     json_in.pop('tags')
     article = Article(**json_in, **meta)
@@ -57,7 +60,7 @@ def update_article(db: Session, obj_in: UpdateArticle) -> Article:
     json_in = jsonable_encoder(obj_in)
     meta = {
         'time_updated': datetime.now(timezone.utc),
-        'tags': _process_tag_labels(json_in.tags, create=True)
+        'tags': process_tag_labels(json_in.tags, create=True)
     }
     json_in.pop('tags')
     update = {**json_in, **meta}
@@ -76,16 +79,16 @@ def delete_article(db: Session, id_: int) -> Article:
 
 
 def _new_article_id(db: Session) -> int:
-    max = db.query(func.max(Article.id_)).scalar()
-    return 0 if max is None else max + 1
+    max_id = db.query(func.max(Article.id_)).scalar()
+    return 0 if max_id is None else max_id + 1
 
 
 def _new_tag_id(db: Session) -> int:
-    max = db.query(func.max(Tag.id_)).scalar()
-    return 0 if max is None else max + 1
+    max_id = db.query(func.max(Tag.id_)).scalar()
+    return 0 if max_id is None else max_id + 1
 
 
-def _process_tag_labels(db: Session, tag_labels: list[str], create=True) -> list[Tag]:
+def process_tag_labels(db: Session, tag_labels: list[str], create=True) -> list[Tag]:
     '''
     Converts tag labels to SQLAlchemy objects, creating them if necessary.
     '''
