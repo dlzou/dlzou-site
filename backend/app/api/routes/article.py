@@ -21,32 +21,47 @@ def create_article(obj_in: schemas.CreateArticle,
 
 
 @router.get('/', response_model=schemas.PreviewList)
-def get_articles(db: Session = Depends(dep.get_db)):
-    ...
+def get_previews(tags: list[str] = [],
+                 years: list[int] = [],
+                 skip: int = 0,
+                 limit: int = 10,
+                 db: Session = Depends(dep.get_db)):
+    article_ids = db.article.get_ids_by_filters(db, tags=tags, years=years,
+                                                skip=skip, limit=limit)
+
+    previews = [crud.get_preview_by_id(db, aid) for aid in article_ids]
+    response = schemas.PreviewList(previews=previews, tags=tags, years=years,
+                                   skip=skip, limit=limit)
+    return response
 
 
-@router.get('/{id_}', response_model=schemas.Article)
-def get_article(id_: int,
+@router.get('/{aid}', response_model=schemas.Article)
+def get_article(aid: int,
                 db: Session = Depends(dep.get_db)):
-    article = crud.article.get_article_by_id(id_)
+    article = crud.article.get_article_by_id(aid)
     if not article:
         raise HTTPException(status_code=404, detail='Article not found.')
     return article
 
 
-@router.put('/{id_}', response_model=schemas.Article)
-def update_article(id_: int,
+@router.put('/{aid}', response_model=schemas.Article)
+def update_article(aid: int,
                    obj_in: schemas.UpdateArticle,
                    is_admin: bool = Depends(dep.authenticate),
                    db: Session = Depends(dep.get_db)):
     if not is_admin:
         raise HTTPException(status_code=400, detail='Access denied.')
-    ...
+    if aid != obj_in.id_:
+        raise HTTPException(status_code=400, detail='Bad request: ID does not match.')
+    article = crud.article.update_article(db, obj_in)
+    return article
 
 
-@router.delete('/{id_}', response_model=schemas.Article)
-def delete_article(id_: int,
-                   is_admin: bool = Depends(dep.authenticate)):
+@router.delete('/{aid}', response_model=schemas.Article)
+def delete_article(aid: int,
+                   is_admin: bool = Depends(dep.authenticate),
+                   db: Session = Depends(dep.get_db)):
     if not is_admin:
         raise HTTPException(status_code=400, detail='Access denied.')
-    ...
+    article = crud.article.remove(db, aid)
+    return article

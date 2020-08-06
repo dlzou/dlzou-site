@@ -65,7 +65,10 @@ class Preview(BaseArticle):
 
 class PreviewList(Model):
     previews: list[Preview]
-    filter_tags: list[Tag] = []
+    tags: list[Tag] = []
+    years: list[int] = []
+    skip: int
+    limit: int
 
 
 class Tag(BaseModel):

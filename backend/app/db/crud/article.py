@@ -13,10 +13,17 @@ def get_article_by_id(db: Session, article_id: str) -> Article:
     return article
 
 
+def get_preview_by_id(db: Session, article_id: int) -> Preview:
+    article = db.query(Article).filter(Article.id_ == article_id).first()
+    return Preview.from_orm(article)
+
+
 def get_ids_by_filters(db: Session,
-                       tags: list[str],
-                       years: list[int],
-                       limits: tuple[int, int]
+                       *,
+                       tags: list[str] = [],
+                       years: list[int] = [],
+                       skip: int = 0,
+                       limit: int = 10
                        ) -> list[int]:
     tags[:] = _process_tag_labels(db, tags, create=False)
     article_ids = db.query(Article.id_)
@@ -27,13 +34,8 @@ def get_ids_by_filters(db: Session,
     if len(years) > 0:
         article_ids = article_ids.filter(Article.time_created.year.in_(years))
 
-    article_ids = article_ids.all()[limits[0]:limits[1]]
+    article_ids = article_ids.all()[skip: skip + limit]
     return article_ids
-
-
-def get_preview_by_id(db: Session, article_id: int) -> Preview:
-    article = db.query(Article).filter(Article.id_ == article_id).first()
-    return Preview.from_orm(article)
 
 
 def create_article(db: Session, obj_in: CreateArticle) -> Article:
