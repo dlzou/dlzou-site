@@ -1,20 +1,18 @@
 from __future__ import annotations
-from typing import Union
+from typing import Optional, Union
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func, not_
-from fastapi.encoders import jsonable_encoder
 from datetime import datetime, timezone
 
 from app.schemas import CreateArticle, UpdateArticle, Preview, PreviewList
 from app.db.models import Article, Tag, ArticleToTag
 
 
-def get_article_by_id(db: Session, article_id: str) -> Article:
-    article = db.query(Article).filter(Article.id_ == article_id).first()
-    return article
+def get_article_by_id(db: Session, article_id: str) -> Optional[Article]:
+    return db.query(Article).filter(Article.id_ == article_id).first()
 
 
-def get_preview_by_id(db: Session, article_id: int) -> Preview:
+def get_preview_by_id(db: Session, article_id: int) -> Optional[Preview]:
     article = db.query(Article).filter(Article.id_ == article_id).first()
     return Preview.from_orm(article)
 
@@ -42,37 +40,39 @@ def get_ids_by_filters(db: Session,
 
 
 def create_article(db: Session, obj_in: CreateArticle) -> Article:
-    json_in = jsonable_encoder(obj_in)
     meta = {
         'id_': _new_article_id(db),
         'time_created': datetime.now(timezone.utc),
         'views': 0,
-        'tags': process_tag_labels(json_in.tags, create=True)
+        'tags': process_tag_labels(obj_in.tags, create=True)
     }
-    json_in.pop('tags')
-    article = Article(**json_in, **meta)
+    article = Article(**obj_in.dict(exclude={'tags'}), **meta)
     db.add(article)
     db.commit()
     return article
 
 
-def update_article(db: Session, obj_in: UpdateArticle) -> Article:
-    json_in = jsonable_encoder(obj_in)
+def update_article(db: Session, obj_in: UpdateArticle) -> Optional[Article]:
+    article = get_article_by_id(db, obj_in.id_)
+    if article is None:
+        return None
+
     meta = {
         'time_updated': datetime.now(timezone.utc),
-        'tags': process_tag_labels(json_in.tags, create=True)
+        'tags': process_tag_labels(obj_in.tags, create=True)
     }
-    json_in.pop('tags')
-    update = {**json_in, **meta}
-    article = get_article_by_id(json_in['id_'])
+    update = {**obj_in.dict(exclude={'tags'}), **meta}
     for attr in update:
         setattr(article, attr, update[attr])
     db.commit()
     return article
 
 
-def delete_article(db: Session, id_: int) -> Article:
-    article = db.query(Article).get(id_)
+def delete_article(db: Session, id_: int) -> Optional[Article]:
+    article = get_article_by_id(db, id_)
+    if article is None:
+        return None
+
     db.delete(article)
     db.commit()
     return article

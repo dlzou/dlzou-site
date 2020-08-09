@@ -73,5 +73,5 @@ def delete_tag_orphans(db: Session, ctx) -> None:
 
 
 class Admin(Base):
-    username = Column(String, primary_key=True, nullable=False)
+    email = Column(String, primary_key=True, nullable=False)
     password_hash = Column(String, nullable=False)
