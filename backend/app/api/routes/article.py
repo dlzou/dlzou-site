@@ -12,10 +12,10 @@ router = APIRouter()
 
 @router.post('/new')
 def create_article(obj_in: schemas.CreateArticle,
-                   is_admin: bool = Depends(dep.authenticate),
+                   is_admin: bool = Depends(dep.is_admin),
                    db: Session = Depends(dep.get_db)):
     if not is_admin:
-        raise HTTPException(status_code=400, detail='Access denied.')
+        raise HTTPException(status_code=401, detail='Access denied.')
     article = crud.article.create_article(db, obj_in)
     return article
 
@@ -47,21 +47,21 @@ def get_article(aid: int,
 @router.put('/{aid}', response_model=schemas.Article)
 def update_article(aid: int,
                    obj_in: schemas.UpdateArticle,
-                   is_admin: bool = Depends(dep.authenticate),
+                   is_admin: bool = Depends(dep.is_admin),
                    db: Session = Depends(dep.get_db)):
     if not is_admin:
-        raise HTTPException(status_code=400, detail='Access denied.')
+        raise HTTPException(status_code=401, detail='Access denied.')
     if aid != obj_in.id_:
-        raise HTTPException(status_code=400, detail='Bad request: ID does not match.')
+        raise HTTPException(status_code=400, detail='Bad request: article ID does not match.')
     article = crud.article.update_article(db, obj_in)
     return article
 
 
 @router.delete('/{aid}', response_model=schemas.Article)
 def delete_article(aid: int,
-                   is_admin: bool = Depends(dep.authenticate),
+                   is_admin: bool = Depends(dep.is_admin),
                    db: Session = Depends(dep.get_db)):
     if not is_admin:
-        raise HTTPException(status_code=400, detail='Access denied.')
+        raise HTTPException(status_code=401, detail='Access denied.')
     article = crud.article.remove(db, aid)
     return article

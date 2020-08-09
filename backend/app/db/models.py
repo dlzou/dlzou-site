@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Text, DateTime, event
+from sqlalchemy import Column, ForeignKey, Boolean, Integer, String, Text, DateTime, event
 from sqlalchemy.orm import Session, object_session, relationship, attributes
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -70,3 +70,8 @@ def delete_tag_orphans(db: Session, ctx) -> None:
     # verbose approach is desired.
     if flag:
         db.query(Tag).filter(~Tag.entries.any()).delete(synchronize_session=False)
+
+
+class Admin(Base):
+    username = Column(String, primary_key=True, nullable=False)
+    password_hash = Column(String, nullable=False)
