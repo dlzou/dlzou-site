@@ -17,3 +17,7 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
     admin = crud.admin.authenticate(db, form_data.username, form_data.password)
     if not admin:
         raise HTTPException(status_code=400, detail="Incorrect username or password.")
+    return {
+        'access_token': security.create_access_token(admin.email),
+        'token_type': 'bearer'
+    }
