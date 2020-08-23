@@ -15,7 +15,7 @@ class Base:
 
 class Article(Base):
     id_ = Column(Integer, primary_key=True, nullable=False)
-    title = Column(Text, nullable=False)
+    title = Column(Text, unique=True, nullable=False)
     author = Column(String, nullable=False)
     description = Column(Text)
     body = Column(Text, nullable=False)

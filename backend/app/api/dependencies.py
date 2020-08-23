@@ -1,10 +1,10 @@
 from __future__ import annotations
 from typing import Generator
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
-from re import sub
+from re import sub, match
 
 from app.core import config, security
 from app.db import crud
@@ -34,8 +34,11 @@ def is_admin(token: str = Depends(oauth2_scheme),
     if token_data:
         admin = crud.admin.get_by_email(db, email=token_data.subject)
         return admin is not None
-
     return False
+
+
+def email_format(s: str) -> bool:
+    return match(r'^[^@\s]+@\w+(-\w+)*(\.\w+(-\w+)*){1,3}$', s) is not None
 
 
 def get_slug(title: str) -> str:
