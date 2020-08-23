@@ -8,4 +8,4 @@ class Token(BaseModel):
 
 
 class TokenPayload(BaseModel):
-    subject: Optional[str] = None
+    sub: Optional[str] = None

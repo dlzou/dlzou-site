@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Body, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from datetime import timedelta
 
 from app import schemas
 from app.db import crud, models
@@ -22,7 +23,9 @@ def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
         raise HTTPException(status_code=401,
                             detail='Incorrect email or password.',
                             headers={'WWW-Authenticate': 'Bearer'})
+    expires = timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MIN)
     return {
-        'access_token': security.create_access_token(admin.email),
+        'access_token': security.create_access_token(data={'sub': 'username:' + admin.email},
+                                                     delta=expires),
         'token_type': 'bearer'
     }

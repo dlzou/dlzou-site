@@ -34,7 +34,9 @@ def is_admin(token: str = Depends(oauth2_scheme),
     if token_data:
         admin = crud.admin.get_by_email(db, email=token_data.subject)
         return admin is not None
-    return False
+    raise HTTPException(status_code=401,
+                        detail='Invalid credentials.',
+                        headers={'WWW-Authenticate': 'Bearer'})
 
 
 def email_format(s: str) -> bool:
