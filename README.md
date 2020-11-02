@@ -1,7 +1,3 @@
-# dlzou.com (hopefully)
+# dlzou-site
 
-FastAPI, Pydantic, SQLAlchemy, Vue.js. Maybe asyncio or Celery. 
-
-"Isn't this overkill for a personal website?" Shh...
-
-### Shelving this project for now...
+Unfinished fullstack personal website. I'm now using Jekyll instead; I wrote about why I made this change on [dlzou.github.io](dlzou.github.io). 
